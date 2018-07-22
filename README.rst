@@ -95,6 +95,33 @@ This process is done automatically upon starting the dev asset server or buildin
 your assets to prepare for a production release. All of that is taken care of in
 the ``webpack.config.js`` file.
 
+Making it work with AggressiveSplittingPlugin
+---------------------------------------------
+
+The webpack ``AggressiveSplittingPlugin`` will often introduce an arbitrary number
+of chunks per entrypoint. For Flask-Webpack to function appropriately, we need to
+modify the ``ManifestRevisionPlugin`` to produce a manifest file with a list of
+chunks per entry point, instead of a simple translation to a hashed file name. To make
+this work, please configure your ``ManifestRevisionPlugin`` as such:
+
+::
+
+  new ManifestRevisionPlugin('<path_to_manifest>', {
+    rootAssetPath: '<your_root_asset_path>',
+    format: function (data, parsedAssets) {
+      let assets = {}
+      for (var entryPoint in data.entrypoints) {
+        assets[`${entryPoint}.js`] = data.entrypoints[entryPoint]['assets']
+      }
+      let result = {
+        assets,
+        publicPath: data.publicPath
+      }
+
+      return result
+  }
+
+
 Settings
 ^^^^^^^^
 

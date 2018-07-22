@@ -88,9 +88,12 @@ class Webpack(object):
         tags = []
 
         for arg in args:
-            asset_path = self.asset_url_for('{0}.js'.format(arg))
-            if asset_path:
-                tags.append('<script src="{0}"></script>'.format(asset_path))
+            asset_paths = self.asset_url_for('{0}.js'.format(arg))
+            if asset_paths:
+                for asset_path in asset_paths:
+                    tags.append(
+                        '<script src="{0}"></script>'.format(asset_path)
+                    )
 
         return '\n'.join(tags)
 
@@ -104,10 +107,12 @@ class Webpack(object):
         tags = []
 
         for arg in args:
-            asset_path = self.asset_url_for('{0}.css'.format(arg))
-            if asset_path:
-                tags.append(
-                    '<link rel="stylesheet" href="{0}">'.format(asset_path))
+            asset_paths = self.asset_url_for('{0}.css'.format(arg))
+            if asset_paths:
+                for asset_path in asset_paths:
+                    tags.append(
+                        '<link rel="stylesheet" href="{0}">'.format(asset_path)
+                    )
 
         return '\n'.join(tags)
 
@@ -126,4 +131,8 @@ class Webpack(object):
         if asset not in self.assets:
             return None
 
-        return '{0}{1}'.format(self.assets_url, self.assets[asset])
+        if isinstance(self.assets[asset], list):
+            return ['{0}{1}'.format(self.assets_url, x) for x in
+                    self.assets[asset]]
+        else:
+            return ['{0}{1}'.format(self.assets_url, self.assets[asset])]
